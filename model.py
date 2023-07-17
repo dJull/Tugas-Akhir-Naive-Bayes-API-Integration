@@ -28,8 +28,6 @@ import pickle
 #Import Dataset
 df = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/loans_full_schema.csv ")
 
-from sklearn.preprocessing import OrdinalEncoder
-
 
 attr = ['homeownership','annual_income','debt_to_income','loan_purpose','loan_amount','balance','term', 'interest_rate', 'grade']
 df = df[attr]
