@@ -26,7 +26,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 import pickle
 
 #Import Dataset
-df = pd.read_csv("loans_full_schema.csv")
+df = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/loans_full_schema.csv ")
 
 from sklearn.preprocessing import OrdinalEncoder
 
