@@ -17,8 +17,8 @@ def Home():
 @app.route("/predict/<loanId>", methods=["POST"])
 def predict(loanId):
     content = request.json
-    float_features = pd.DataFrame(content)
-    prediction = model.predict(float_features)
+    features = pd.DataFrame(content)
+    prediction = model.predict(features)
     return jsonify({"credit_score": str(prediction[0]), "loanId": loanId})
 
 

@@ -9,20 +9,17 @@ Original file is located at
 
 #Import Library
 import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score
 import math
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
-from sklearn.naive_bayes import GaussianNB, CategoricalNB, MultinomialNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import classification_report
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.ensemble import BaggingClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
 import pickle
 
 #Import Dataset
@@ -32,16 +29,17 @@ df = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Baye
 attr = ['homeownership','annual_income','debt_to_income','loan_purpose','loan_amount','balance','term', 'interest_rate', 'grade']
 df = df[attr]
 
-df.info()
 
 # Splitting dataset to X and y
 X = df.drop(columns="grade")
 y = df['grade']
 
-
-from sklearn.model_selection import train_test_split, GridSearchCV
-# Split to 80% training data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3)
+X_train = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/x_train_70_30_for_tuning.csv")
+X_test= pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/x_test_70_30_for_tuning.csv")
+X_val = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/x_val_70_30_for_tuning.csv")
+y_train = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/y_train_70_30_for_tuning.csv")
+y_test = pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/y_test_70_30_for_tuning.csv")
+y_val= pd.read_csv("https://raw.githubusercontent.com/dJull/Tugas-Akhir-Naive-Bayes-API-Integration/master/y_val_70_30_for_tuning.csv")
 
 # Create pipeline for numerical
 numerical_pipeline = Pipeline([
@@ -52,34 +50,29 @@ numerical_pipeline = Pipeline([
 # Create pipeline for categorical
 categorical_pipeline = Pipeline([
     ('categorical_imputation', SimpleImputer(strategy="most_frequent")),
-    ('encoder', OneHotEncoder())
+    ('encoder', OneHotEncoder(handle_unknown='ignore')),
     ])
 
 # Create column transform
 transform = ColumnTransformer([
     ('categoric', categorical_pipeline, ["homeownership", "loan_purpose"]),
     ('numeric', numerical_pipeline, ["annual_income","debt_to_income","loan_amount","balance","term","interest_rate"])
-    ])
+    ], remainder='passthrough')
+
 # Create pipeline for algorithm
 pipeline = Pipeline([
     ('prep', transform),
-    ('algo', GaussianNB())
+    ('algo', GaussianNB(var_smoothing = 0.008841631357822753))
 ])
 
-
 # Fit Transform X_train and y_train
-pipeline.fit(X_train,y_train)
-
+pipeline.fit(X_train,y_train.grade)
+model_score = pipeline.score(X_val,y_val)
 # Prediction
-y_pred = pipeline.predict(X_test)
+y_pred = pipeline.predict(X_val)
 
 # Evaluation
-print(pipeline.score(X_train,y_train), pipeline.score(X_test,y_test))
-print(classification_report(y_test,y_pred))
-
-cm = confusion_matrix(y_test, y_pred, labels=pipeline.classes_)
-cm
+print(round(model_score,2))
+print(classification_report(y_val.grade,y_pred))
 
 pickle.dump(pipeline,open("model.pkl","wb"))
-
-
